@@ -38,6 +38,7 @@ t_token *parser(char *s, int i)
         {
             token->type = multiplication;
         }
+        
     }
 }
 int main(int argc, char **argv)
