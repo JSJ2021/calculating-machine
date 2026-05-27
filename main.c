@@ -27,6 +27,18 @@ t_token *create_num(int n)
     node->right = 0;
     return node;
 }
+void free_node(t_token *token)
+{
+    if (token)
+    {
+        if ((token)->left)
+            free_node((token)->left);
+        if ((token)->right)
+            free_node((token)->right);
+        free(token);
+        token = 0;
+    }
+}
 
 t_token *init_token(cal_type type, t_token *left, t_token *right)
 {
@@ -39,7 +51,10 @@ t_token *init_token(cal_type type, t_token *left, t_token *right)
 
 t_token *parser_num(char *s, int *i)
 {
-    t_token *token = create_num(s[*i] - 48);
+    t_token *token = 0;
+    
+    if(isdigit(s[*i]))
+        token = create_num(s[*i] - 48);
     (*i)++;
     return (token);
 }
@@ -66,6 +81,11 @@ t_token *parser(char *s, int *i)
         (*i)++;
         right = parser_trem(s, i);
         left = init_token(add, left, right);
+    }
+    if (right == 0 || left == 0)
+    {
+        printf("Unexpected end of input\n");
+        free_node(left);
     }
     return left;
 }
@@ -100,7 +120,7 @@ int main()
 {
     int result;
     int i = 0;
-    t_token *token = parser("1+1*2*5+4", &i);
+    t_token *token = parser("1+1*2*5+1*2+2", &i);
     result = operating(token);
     if(result != -1)
         printf("%d\n", result);
