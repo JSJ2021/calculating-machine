@@ -18,6 +18,8 @@ typedef struct s_token
     struct s_token *right;    
 } t_token;
 
+t_token *parser(char *s, int *i);
+
 t_token *create_num(int n)
 {
     t_token *node = malloc(sizeof(t_token));
@@ -27,6 +29,7 @@ t_token *create_num(int n)
     node->right = 0;
     return node;
 }
+
 void free_node(t_token *token)
 {
     if (token)
@@ -59,14 +62,30 @@ t_token *parser_num(char *s, int *i)
     return (token);
 }
 
+t_token *parser_pair(char *s, int *i)
+{
+    t_token *node;
+    if(s[*i] == '(')
+    {
+        (*i)++;
+        node = parser(s,i);
+        if (s[*i] == ')')
+            (*i)++;
+        else
+            printf("Unexpected token \'%d\'\n",s[*i]);
+        return (node);
+    }
+    return (parser_num(s,i));
+}
+
 t_token *parser_trem(char *s, int *i)
 {
-    t_token *left = parser_num(s, i);
+    t_token *left = parser_pair(s, i);
     t_token *right;
     while (s[*i] == '*')
     {
         (*i)++;
-        right = parser_num(s, i);
+        right = parser_pair(s, i);
         left = init_token(multiplication, left, right);
     }
     return left;
@@ -84,7 +103,6 @@ t_token *parser(char *s, int *i)
     }
     if (right == 0 || left == 0)
     {
-        printf("Unexpected end of input\n");
         free_node(left);
     }
     return left;
@@ -120,9 +138,10 @@ int main()
 {
     int result;
     int i = 0;
-    t_token *token = parser("1+1*2*5+1*2+2", &i);
+    t_token *token = parser("1+(1+2*2*2", &i);
     result = operating(token);
     if(result != -1)
         printf("%d\n", result);
+    free(token);
     return (0);
 }
